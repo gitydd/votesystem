@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<form class="form-horizontal" method="post">
+<fieldset>
+<legend>注册候选人</legend>
+<div class="control-group">
+<label class="control-label" for="username">候选人名</label>
+<div class="controls">
+<input type="text" class="input-xlarge" id="username" name="username">
+<p class="help-block">账户名称，用于登录和显示。 </p>
+</div>
+</div>
+<div class="form-actions">
+<button type="submit" class="btn btn-primary">注册</button>
+</div>
+
+<div class="control-group">
+     <table class="table table-bordered">
+  <caption class="lead">候选人列表</caption>
+  <tr>
+    <div class="span1">
+      <th>候选人名字</th>
+      <th>候选人地址</th>
+    </div>
+  </tr>
+<% for(i=0;i<candidates.length;i++) { %>
+<tr>
+      <div class="span1">
+        <td><%= candidates[i].name%></td>
+        <td><%= candidates[i].address%></td>
+      </div>
+    </tr>
+
+<%}%>
+</table>
+
+     </div>
+</fieldset>
+</form>

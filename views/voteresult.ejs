@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<h1>投票结果</h1>
+<form class="form-horizontal" action="/voteresult" method="post">
+  <fieldset>
+     <table class="table table-bordered">
+  <caption class="lead">候选人列表</caption>
+  <tr>
+    <div class="span1">
+      <th>候选人名字</th>
+      <th>候选人地址</th>
+      <th>票数</th>
+    </div>
+  </tr>
+<% for(i=0;i<candidates.length;i++) { %>
+<tr>
+      <div class="span1">
+       <td><%= candidates[i].name%></td>
+       <td><%= candidates[i].address%></td>
+       <td><%= Math.ceil(candidates[i].vote)%></td> 
+      </div>
+    </tr>
+<%}%>
+</table>
+ <!-- <div class="form-actions">
+      <input type="button" onclick="confir()" value="结束投票" class="btn btn-primary">
+
+    </div>
+-->
+  </fieldset>
+</form>
+
+
+<script type="text/javascript">
+ function confir() {					
+     if(window.confirm("选民将无法投票,确定吗？")){				
+	 window.location.href="/voteresult";				
+	}
+				
+   }
+</script>
+

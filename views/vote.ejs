@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<h1>候选人名单</h1>
+<form class="form-horizontal" method="post">
+  <fieldset>
+
+<table class="table table-bordered">
+  <caption class="lead">候选人列表</caption>
+  <tr>
+    <div class="span1">
+      <th>候选人名字</th>
+      <th>候选人地址</th>
+      <th>选择</th>
+    </div>
+  </tr>
+<% for(i=0;i<candidates.length;i++) { %>
+<tr>
+      <div class="span1">
+       <td><%= candidates[i].name%></td>
+       <td><%= candidates[i].address%></td>
+        <td><input type="radio" name="radio" 
+            value="<%=candidates[i].address%>"></td>
+      </div>
+    </tr>
+<%}%>
+</table>
+
+     <div class="form-actions">
+      <input type="submit" onclick="get()" value="投票" class="btn btn-primary"></button>
+    </div>
+  </fieldset>
+</form>
