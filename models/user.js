@@ -9,6 +9,9 @@ function User(user) {
         this.address = user.address;
 	this.password = user.password;
         this.vote='';
+        this.setAddress = function (address) {
+           this.address = address;
+        };
 };
 
 module.exports = User;
@@ -78,6 +81,33 @@ User.get = function get(username, callback) {
 	});
 };
 
+//addAddress
+User.addAddress = function addAddress(username,newaddress, callback) {
+	mongodb.open(function(err, db) {
+		if (err) {
+			return callback(err);
+		}
+
+		db.collection('users', function(err, collection) {
+			if (err) {
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.findOne({name: username}, function(err, doc) {
+				mongodb.close();
+				if (doc) {
+                                        
+					var user = new User(doc);
+                                        user.setAddress(newaddress);
+					callback(err, user);
+				} else {
+					callback(err, null);
+				}
+			});
+		});
+	});
+};
 
 //讀取
 

@@ -260,12 +260,37 @@ router.post('/reg1', function(req, res, next) {
 });
 
 
+//分配地址和选票
+//router.get("/makevoteraddress",checkLogin);
+router.get('/makevoteraddress',function(req,res,next){
+  voteraddress.test(function(address){
+ //console.log(address,req.query.votername,'new address1');
+  /*  User.update(req.query.votername,address,function(err, user) {
+   if (err) {
+       req.flash('error', err);
+     return res.redirect('/managevoter');
+     }
+  });
+*/
+  User.addAddress(req.query.votername,address,function(err,user){
+    User.update(user.name,user.address,function(err,user){
+       if (err) {
+       req.flash('error', err);
+       return res.redirect('/managevoter');
+       }
 
+       res.redirect('/managevoter');
+    });
+    
+  });
+ 
+  });
+   
+});
 
 //管理选民
 //router.get("/managevoter",checkNotLogin);
 router.get('/managevoter', function(req, res, next) {
- console.log(req.query.votername,'votername');
  User.list(null,function(err, user1) {
      if (err) {
        req.flash('error', err);
@@ -280,9 +305,7 @@ router.get('/managevoter', function(req, res, next) {
        votes:user1,
      });
    });
-
-   var address=voteraddress.test();
-  console.log(address,req.query.votername,'new address');
+ 
  /* User.update(req.query.votername,address,function(err, user) {
    if (err) {
        req.flash('error', err);
@@ -290,39 +313,9 @@ router.get('/managevoter', function(req, res, next) {
      }
   });
 */
- User.list(null,function(err, user1) {
-     if (err) {
-       req.flash('error', err);
-     return res.redirect('/managevoter');
-     }
-     if (!user1) {
-       req.flash('error', 'no user');
-     return res.redirect('/managevoter');
-     }
-     res.render('managevoter',{
-       title: '管理选民',
-       votes:user1,
-     });
-   });
 
 });
 
-router.post('/managevoter', function(req, res, next) {
-  User.list(null,function(err, user1) {
-     if (err) {
-       req.flash('error', err);
-     return res.redirect('/managevoter');
-     }
-     if (!user1) {
-       req.flash('error', 'no user');
-     return res.redirect('/managevoter');
-     }
-     res.render('managevoter',{
-       title: '管理选民',
-       votes:user1,
-     });
-   });
-});
 // 登录页路由
 router.get("/login",checkNotLogin);
 router.get('/login', function(req, res, next) {
@@ -417,12 +410,6 @@ router.get('/logout', function(req, res, next) {
   res.redirect('/');
 });
 
-
-
-//分配地址和选票
-router.post("/makevoteraddress",checkLogin);
-router.post('/makevoteraddress',function(req,res){
-});
 
 
 function checkLogin(req, res, next) {

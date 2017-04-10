@@ -1,6 +1,6 @@
 global.voteraddress='';
 module.exports={
-test:function test(){
+test:function test(callback){
 var RPC_USERNAME='admin2'; 
 var RPC_PASSWORD='123';
 var RPC_HOST="127.0.0.1";
@@ -21,9 +21,9 @@ client.getnewaddress(function(err, info) {
   if (err) return console.log(err);
   console.log('generatenewaddress:', info);
   global.voteraddress=info;
+  return callback(info);
 });
- console.log('voteraddress:', global.voteraddress);
-   return global.voteraddress;
+
 }
 };
 
