@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<form class="form-horizontal" method="post">
+<fieldset>
+<legend>选民管理</legend>
+
+<div class="control-group">
+     <table class="table table-bordered">
+  <caption class="lead">选民列表</caption>
+  <tr>
+    <div class="span1">
+      <th>选民名字</th>
+      <th>选民地址</th>
+      <th>管理</th>
+    </div>
+  </tr>
+<% for(i=0;i<votes.length;i++) { %>
+<tr>
+      <div class="span1">
+        <td><%= votes[i].name%></td>
+        <td><%= votes[i].address%></td>
+         <td><a href="/managevoter?votername=<%= votes[i].name %>"> 分配地址和选票</a></td>
+      </div>
+    </tr>
+<%}%>
+</table>
+     </div>
+
+
+
+
+
+
+</fieldset>
+</form>

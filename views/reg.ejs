@@ -26,29 +26,5 @@ name="password-repeat">
 <button type="submit" class="btn btn-primary">注册</button>
 </div>
 
-
-<div class="control-group">
-     <table class="table table-bordered">
-  <caption class="lead">选民列表</caption>
-  <tr>
-    <div class="span1">
-      <th>选民名字</th>
-      <th>选民地址</th>
-    </div>
-  </tr>
-<% for(i=0;i<votes.length;i++) { %>
-<tr>
-      <div class="span1">
-        <td><%= votes[i].name%></td>
-        <td><%= votes[i].address%></td>
-      </div>
-    </tr>
-
-<%}%>
-</table>
-
-     </div>
-
-
 </fieldset>
 </form>

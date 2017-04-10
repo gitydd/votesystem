@@ -29,9 +29,10 @@ padding-bottom: 40px;
 <li class="active"><a href="/">首页</a></li>
 <% if (!user) { %>
 <li><a href="/home">投票流程</a></li>
+<li><a href="/reg">注册</a></li>
 <li><a href="/login">登录</a></li>
 <% } else if(user.name=='ydd'){ %>
-<li><a href="/reg">注册选民</a></li>
+<li><a href="/managevoter">选民管理</a></li>
 <li><a href="/reg1">注册候选人</a></li>
 <li><a href="/voteresult">投票结果</a></li>
 <li><a href="/repassword">修改密码</a></li>
