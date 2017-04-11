@@ -26,7 +26,7 @@ Status.get = function get(name, callback) {
 				mongodb.close();
 				if (doc) {
 				//	var user1 = new Status(doc);
-                                       console.log(doc,'get status');
+                                 //      console.log(doc,'get status');
 					callback(err, doc);
 				} else {
 					callback(err, null);

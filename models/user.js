@@ -9,8 +9,12 @@ function User(user) {
         this.address = user.address;
 	this.password = user.password;
         this.vote='';
+        this.status='';
         this.setAddress = function (address) {
            this.address = address;
+        };
+        this.setStatus = function (status) {
+           this.status = status;
         };
 };
 
@@ -26,6 +30,7 @@ User.prototype.save = function save(callback) {
                 address:this.address,
 		password: this.password,
                 vote:'',
+                status:'',
 	};
 
 	mongodb.open(function(err, db) {

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<h1>投票结果</h1>
+<form class="form-horizontal"  method="post">
+  <fieldset>
+     <table class="table table-bordered">
+  <caption class="lead">候选人列表</caption>
+  <tr>
+    <div class="span1">
+      <th>候选人名字</th>
+      <th>候选人地址</th>
+      <th>票数</th>
+    </div>
+  </tr>
+<% for(i=0;i<candidates.length;i++) { %>
+<tr>
+      <div class="span1">
+       <td><%= candidates[i].name%></td>
+       <td><%= candidates[i].address%></td>
+       <td><%= Math.ceil(candidates[i].vote)%></td> 
+      </div>
+    </tr>
+<%}%>
+</table>
+ 
+  </fieldset>
+</form>
+
+
+
+

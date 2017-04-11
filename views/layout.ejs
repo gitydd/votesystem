@@ -31,20 +31,20 @@ padding-bottom: 40px;
 <li><a href="/home">投票流程</a></li>
 <li><a href="/reg">注册</a></li>
 <li><a href="/login">登录</a></li>
-<% } else if(user.name=='ydd'){ %>    
+<% } else if(user.name=='ydd'){ %>   
 <li><a href="/managevoter">选民管理</a></li>
 <li><a href="/reg1">注册候选人</a></li>
 <li><a href="/voteresult">投票管理</a></li>
 <li><a href="/repassword">修改密码</a></li>
 <li><a href="/logout">退出登录</a></li>
-<% } else if(status.flag==1){ %>
+<% } else if(user.status===1){ %>
 <li><a href="/home">投票流程</a></li>
 <li><a href="/vote">开始投票</a></li>
 <li><a href="/repassword">修改密码</a></li>
 <li><a href="/logout">退出登录</a></li>
 <% } else { %>
 <li><a href="/home">投票流程</a></li>
-<li><a href="/voteresult">投票结果</a></li>
+<li><a href="/voteresult1">投票结果</a></li>
 <li><a href="/repassword">修改密码</a></li>
 <li><a href="/logout">退出登录</a></li>
 <% } %>

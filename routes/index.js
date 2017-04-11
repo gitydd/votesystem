@@ -39,7 +39,7 @@ router.get('/', function(req, res,next) {
 		res.render('index', {
 			title: '首页',
 			posts: posts,
-                        status:status,
+                        status:req.session.status,
 			user : req.session.user,
             success : req.flash('success').toString(),
             error : req.flash('error').toString()
@@ -63,10 +63,11 @@ router.post('/votestop',function(req,res,next){
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
-    });
+      // res.redirect('/voteresult');  
+   }); 
     req.flash('success', '结束投票');
-    res.redirect('/voteresult');  
-
+    res.redirect('/voteresult'); 
+ 
 });
 
 
@@ -78,9 +79,10 @@ router.post('/votestart',function(req,res,next){
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
-    });
+      //res.redirect('/voteresult'); 
+     });
     req.flash('success', '开启投票');
-    res.redirect('/voteresult'); 
+    res.redirect('/voteresult');
 
 });
 
@@ -158,7 +160,32 @@ User1.list(null, function(err, user1) {
 
 });
 
+router.get('/voteresult1', function(req, res, next) {
+  User1.list(null, function(err, user1) {
+      if (err) {
+        user1 = [];
+      }
+      
+       var voteinfo = []; 
+       var candidateswithamount = [];
+       client.listreceivedbyaddress(function(err, info) {
+         if (err) return console.log(err); 
+         info.forEach(function(addressinfo, index1) {
+            user1.forEach(function(candidate, index2) {
+               if(candidate.address===addressinfo.address){                 
+                  candidate.setVote(addressinfo.amount*10000);
+               } 
+             });             
+         });
 
+        res.render('voteresult1', {
+            title:  '投票结果',
+            candidates:user1                                      
+          });
+       });
+ 
+    }); 
+});
 // 注册选民页路由
 router.get('/reg', function(req, res, next) {
  res.render('reg', { title: '注册选民' });
@@ -327,6 +354,7 @@ router.get("/login",checkNotLogin);
 router.get('/login', function(req, res, next) {
   res.render('login', {
     title: '用户登入',
+    status:'',
   });
 });
 router.post("/login",checkNotLogin);
@@ -343,12 +371,21 @@ router.post('/login', function(req, res, next) {
       req.flash('error', '用户口令错误');
       return res.redirect('/login');
     }
-
     req.session.user = user;
-    req.flash('success', '登入成功');
-    res.redirect('/');
-
+    Status.get("status",function(err,status){
+             if(err){
+               req.flash('error', err);
+               return res.redirect('/');
+             }
+             console.log(status.flag,'loginstatus 1');
+             user.setStatus(status.flag);
+             console.log(req.session.user);
+    
+      req.flash('success', '登入成功');
+      res.redirect('/');
+    });
   });
+
 });
 
 
@@ -389,6 +426,8 @@ router.get('/logout', function(req, res, next) {
   req.flash('success', '退出成功');
   res.redirect('/');
 });
+
+
 
 
 
