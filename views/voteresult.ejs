@@ -21,18 +21,44 @@
     </tr>
 <%}%>
 </table>
- <!-- <div class="form-actions">
-      <input type="button" onclick="confir()" value="结束投票" class="btn btn-primary">
-
-    </div>
--->
+ 
   </fieldset>
 </form>
 
 
+<table align="center">
+<tr>
+
+<td>
+<div align="center">
+<form  action="/votestart" method="post">     
+<input type="submit" onclick="confir2()" value="开启投票" class="btn btn-primary">
+</form>
+</div>
+</td>
+
+<td>
+<div align="left">
+<form  action="/votestop" method="post">     
+<input type="submit" onclick="confir1()" value="结束投票" class="btn btn-primary">
+</form>
+</div>
+</td>
+
+</tr>
+</table>
+
+
 <script type="text/javascript">
- function confir() {					
+ function confir1() {					
      if(window.confirm("选民将无法投票,确定吗？")){				
+	 window.location.href="/voteresult";				
+	}
+				
+   }
+
+ function confir2() {					
+     if(window.confirm("选民可以开始投票,确定吗？")){				
 	 window.location.href="/voteresult";				
 	}
 				

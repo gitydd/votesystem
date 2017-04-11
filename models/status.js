@@ -1,38 +1,58 @@
 var mongodb = require('./db');
 
 function Status(status) {
-	this.flag = 0;
+        this.name=status.name;
+	this.flag = '';
         this.setFlag = function (num) {
            this.flag = num;
         };
-        this.getFlag=function (){
-            return flag;
-        }
 };
 
 module.exports = Status;
 
-Status.get = function get(username, callback) {
+Status.get = function get(name, callback) {
 	mongodb.open(function(err, db) {
 		if (err) {
 			return callback(err);
 		}
 
-		db.collection('users1', function(err, collection) {
+		db.collection('statuss', function(err, collection) {
 			if (err) {
 				mongodb.close();
 				return callback(err);
 			}
 
-			collection.findOne({name: username}, function(err, doc) {
+			collection.findOne({name:name}, function(err, doc) {
 				mongodb.close();
 				if (doc) {
-
-					var user1 = new User1(doc);
-					callback(err, user1);
+				//	var user1 = new Status(doc);
+                                       console.log(doc,'get status');
+					callback(err, doc);
 				} else {
 					callback(err, null);
 				}
+			});
+		});
+	});
+};
+
+
+//更新
+Status.update = function update(name,newnum, callback) {
+        console.log(name,newnum,'update');
+	mongodb.open(function(err, db) {
+		if (err) {                 
+			return callback(err);
+		}
+		db.collection('statuss', function(err, collection) {
+			if (err) {    
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.update({name:name}, {$set:{flag:newnum}},false,false, function(err, status) {
+				mongodb.close();
+				callback(err, status);
 			});
 		});
 	});

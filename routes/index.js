@@ -31,21 +31,23 @@ router.get('/', function(req, res,next) {
 		if (err) {
 			posts = [];
 		}
+            Status.get("status",function(err,status){
+             if(err){
+               req.flash('error', err);
+               return res.redirect('/');
+             }
 		res.render('index', {
 			title: '首页',
 			posts: posts,
+                        status:status,
 			user : req.session.user,
             success : req.flash('success').toString(),
             error : req.flash('error').toString()
 		});
+          });
 	});
 });
 
-/*
-router.get('/', function(req, res, next) {
-  res.render('index', { title: '首页' });
-});
-*/
 
 //投票流程
 router.get('/home', function(req, res,next) {
@@ -53,12 +55,38 @@ router.get('/home', function(req, res,next) {
 });
 
 
+//结束投票
+
+router.post('/votestop',function(req,res,next){
+    Status.update("status",0,function(err,status){
+        if (err) {
+               req.flash('error', err);
+               return res.redirect('/voteresult');
+            }  
+    });
+    req.flash('success', '结束投票');
+    res.redirect('/voteresult');  
+
+});
+
+
+//开启投票
+
+router.post('/votestart',function(req,res,next){
+    Status.update("status",1,function(err,status){
+        if (err) {
+               req.flash('error', err);
+               return res.redirect('/voteresult');
+            }  
+    });
+    req.flash('success', '开启投票');
+    res.redirect('/voteresult'); 
+
+});
+
+
 //选民投票
 router.get('/vote', function(req, res, next) { 
-/*  res.render('vote', {
-    title: '选民投票',
-  });
-*/
   
 User1.list(null,function(err, user1) {
      if (err) {
@@ -67,10 +95,6 @@ User1.list(null,function(err, user1) {
      }
      if (!user1) {
        req.flash('error', 'no user');
-     return res.redirect('/vote');
-     }
-     if(req.session.status){
-       req.flash('error', '投票已经结束！');
      return res.redirect('/vote');
      }
      res.render('vote',{
@@ -83,16 +107,12 @@ User1.list(null,function(err, user1) {
 
 
 router.post('/vote', function(req, res, next) { 
-     if(req.session.status){
-       req.flash('error', '投票已经结束！');
-     return res.redirect('/vote');
-     }
      if(req.session.user.name==''){
          req.flash('error', '选民为空');
          res.redirect('/vote'); 
      }
      else if(req.body['radio']==null){
-         req.flash('error',req.session.status);
+         req.flash('error','候选人为空');
          res.redirect('/vote'); 
      }
      else if(req.session.user.vote!=''){
@@ -100,7 +120,7 @@ router.post('/vote', function(req, res, next) {
          res.redirect('/vote'); 
      }
      else{
-     vote.doSample(req.session.user.name,req.body['radio']);
+     vote.doSample(req.session.user.address,req.body['radio']);
      req.session.user.vote=req.body['radio']; 
      }
      req.flash('success', '投票成功');
@@ -111,8 +131,6 @@ router.post('/vote', function(req, res, next) {
 
 //查看投票结果
 router.get('/voteresult', function(req, res, next) { 
-req.session.status=0;
-console.log(req.session.status,'old');
 User1.list(null, function(err, user1) {
       if (err) {
         user1 = [];
@@ -139,12 +157,6 @@ User1.list(null, function(err, user1) {
     });
 
 });
-
-router.post('/voteresult', function(req, res, next) {
-  req.session.status=1;
-  console.log(req.session.status,'new');
-});
-
 
 
 // 注册选民页路由
@@ -190,11 +202,6 @@ router.post('/reg', function(req, res, next) {
 
 // 注册候选人路由
 router.get('/reg1', function(req, res, next) {
-/*res.render('reg1', {
-    title: '注册候选人',
-    candidates:'',
-  });
- */
 User1.list(null,function(err, user1) {
      if (err) {
        req.flash('error', err);
@@ -263,29 +270,36 @@ router.post('/reg1', function(req, res, next) {
 //分配地址和选票
 //router.get("/makevoteraddress",checkLogin);
 router.get('/makevoteraddress',function(req,res,next){
-  voteraddress.test(function(address){
- //console.log(address,req.query.votername,'new address1');
-  /*  User.update(req.query.votername,address,function(err, user) {
-   if (err) {
-       req.flash('error', err);
-     return res.redirect('/managevoter');
-     }
-  });
-*/
-  User.addAddress(req.query.votername,address,function(err,user){
-    User.update(user.name,user.address,function(err,user){
-       if (err) {
-       req.flash('error', err);
+  User.get(req.query.votername,function(err,user){
+     if(user.address!=''){
+       req.flash('error', '已经分配过了，请勿重复分配！');
        return res.redirect('/managevoter');
-       }
+     }
+     else{
+      voteraddress.test(function(address){
+        User.addAddress(req.query.votername,address,function(err,user){
+       
+          User.update(user.name,user.address,function(err,user){
+            if (err) {
+               req.flash('error', err);
+               return res.redirect('/managevoter');
+            }     
+          
+          }); 
 
-       res.redirect('/managevoter');
-    });
-    
-  });
- 
-  });
-   
+          client.sendtoaddress(user.address,10,function(err) {
+              console.log('sendto address');
+              if (err) {
+               req.flash('error', err);
+               return res.redirect('/managevoter');
+              }      
+          }); 
+          res.redirect('/managevoter');
+        });
+       
+      });
+     }
+   });
 });
 
 //管理选民
@@ -305,14 +319,6 @@ router.get('/managevoter', function(req, res, next) {
        votes:user1,
      });
    });
- 
- /* User.update(req.query.votername,address,function(err, user) {
-   if (err) {
-       req.flash('error', err);
-     return res.redirect('/managevoter');
-     }
-  });
-*/
 
 });
 
@@ -337,10 +343,11 @@ router.post('/login', function(req, res, next) {
       req.flash('error', '用户口令错误');
       return res.redirect('/login');
     }
- 
+
     req.session.user = user;
     req.flash('success', '登入成功');
     res.redirect('/');
+
   });
 });
 
@@ -374,33 +381,6 @@ router.post('/repassword', function(req, res, next) {
 });
 
 
-// 登录页路由
-router.get("/login",checkNotLogin);
-router.get('/login', function(req, res, next) {
-  res.render('login', {
-    title: '用户登入',
-  });
-});
-router.post("/login",checkNotLogin);
-router.post('/login', function(req, res, next) {
-  //生成口令的散列值
-  var md5 = crypto.createHash('md5');
-  var password = md5.update(req.body.password).digest('base64');
-  User.get(req.body.username, function(err, user) {
-    if (!user) {
-      req.flash('error', '用户不存在');
-      return res.redirect('/login');
-    }
-    if (user.password != password) {
-      req.flash('error', '用户口令错误');
-      return res.redirect('/login');
-    }
- 
-    req.session.user = user;
-    req.flash('success', '登入成功');
-    res.redirect('/');
-  });
-});
 
 // 退出登录页路由
 router.get("/logout",checkLogin);

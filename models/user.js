@@ -96,9 +96,8 @@ User.addAddress = function addAddress(username,newaddress, callback) {
 
 			collection.findOne({name: username}, function(err, doc) {
 				mongodb.close();
-				if (doc) {
-                                        
-					var user = new User(doc);
+				if (doc) {        
+					var user = new User(doc);     
                                         user.setAddress(newaddress);
 					callback(err, user);
 				} else {
