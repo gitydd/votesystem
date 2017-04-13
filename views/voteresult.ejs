@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<h1>投票结果</h1>
+<legend>投票管理</legend>
 <form class="form-horizontal" action="/voteresult" method="post">
   <fieldset>
      <table class="table table-bordered">
@@ -27,24 +27,40 @@
 
 
 <table align="center">
+
 <tr>
+<td>
+<div align="center"><label for="votes">设置每人可投票数</label></div>
+</td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+
+<form  action="/votestart" method="post">  
+<td>
+<div align="center">
+<input type="text" id="votes" name="votes"> 
+</div>
+</td>
 
 <td>
 <div align="center">
-<form  action="/votestart" method="post">     
 <input type="submit" onclick="confir2()" value="开启投票" class="btn btn-primary">
-</form>
 </div>
 </td>
+</form>
 
+<form  action="/votestop" method="post"> 
 <td>
-<div align="left">
-<form  action="/votestop" method="post">     
+<div align="center">
+    
 <input type="submit" onclick="confir1()" value="结束投票" class="btn btn-primary">
-</form>
+
 </div>
 </td>
-
+</form>
 </tr>
 </table>
 

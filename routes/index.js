@@ -31,20 +31,14 @@ router.get('/', function(req, res,next) {
 		if (err) {
 			posts = [];
 		}
-            Status.get("status",function(err,status){
-             if(err){
-               req.flash('error', err);
-               return res.redirect('/');
-             }
+            
 		res.render('index', {
 			title: '首页',
 			posts: posts,
-                        status:req.session.status,
 			user : req.session.user,
             success : req.flash('success').toString(),
             error : req.flash('error').toString()
 		});
-          });
 	});
 });
 
@@ -58,32 +52,32 @@ router.get('/home', function(req, res,next) {
 //结束投票
 
 router.post('/votestop',function(req,res,next){
-    Status.update("status",0,function(err,status){
+    Status.update("status",0,0,function(err,status){
         if (err) {
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
       // res.redirect('/voteresult');  
    }); 
-    req.flash('success', '结束投票');
-    res.redirect('/voteresult'); 
- 
+   req.flash('success', '结束投票');
+   res.redirect('/voteresult'); 
 });
 
 
 //开启投票
 
 router.post('/votestart',function(req,res,next){
-    Status.update("status",1,function(err,status){
+   console.log(req.body.votes,'everyone votes');
+    Status.update("status",1,req.body.votes,function(err,status){
         if (err) {
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
       //res.redirect('/voteresult'); 
      });
-    req.flash('success', '开启投票');
-    res.redirect('/voteresult');
-
+    
+  req.flash('success', '开启投票');
+  res.redirect('/voteresult');
 });
 
 
@@ -113,25 +107,26 @@ router.post('/vote', function(req, res, next) {
          req.flash('error', '选民为空');
          res.redirect('/vote'); 
      }
-     else if(req.body['radio']==null){
+     else if(req.body['checkbox']==null){
          req.flash('error','候选人为空');
          res.redirect('/vote'); 
      }
-     else if(req.session.user.vote!=''){
-         req.flash('error', '您已经投过票了，请勿重复投票');
+     else if(req.body['checkbox'].length>req.session.user.votes){
+         req.flash('error','对不起，您只有'+req.session.user.votes+'票,请重新选择!');
          res.redirect('/vote'); 
      }
      else{
-     vote.doSample(req.session.user.address,req.body['radio']);
-     req.session.user.vote=req.body['radio']; 
+       for(var i=0;i<req.body['checkbox'].length;i++){
+           vote.doSample(req.session.user.address,req.body['checkbox'][i]);
+       } 
+       req.flash('success', '投票成功');
+       res.redirect('/vote'); 
      }
-     req.flash('success', '投票成功');
-     res.redirect('/vote');  
        
 });
 
 
-//查看投票结果
+//管理员查看投票结果
 router.get('/voteresult', function(req, res, next) { 
 User1.list(null, function(err, user1) {
       if (err) {
@@ -159,7 +154,7 @@ User1.list(null, function(err, user1) {
     });
 
 });
-
+//选民查看投票结果
 router.get('/voteresult1', function(req, res, next) {
   User1.list(null, function(err, user1) {
       if (err) {
@@ -217,8 +212,8 @@ router.post('/reg', function(req, res, next) {
    newUser.save(function(err) {
      if (err) {
        req.flash('error', err);
-     return res.redirect('/reg');
-   }
+       return res.redirect('/reg');
+     }
    req.session.user = newUser;
    req.flash('success', '注册成功');
    res.redirect('/reg');
@@ -379,6 +374,9 @@ router.post('/login', function(req, res, next) {
              }
              console.log(status.flag,'loginstatus 1');
              user.setStatus(status.flag);
+     
+             console.log(status.votes,'loginstatus 2');
+             user.setVotes(status.votes);
              console.log(req.session.user);
     
       req.flash('success', '登入成功');
@@ -411,10 +409,10 @@ router.post('/repassword', function(req, res, next) {
       console.log(err);
       return res.redirect('/repassword');
     }
-    req.flash('success', '修改成功');
-   res.redirect('/repassword');
+   
   });
-  
+   req.flash('success', '修改成功');
+   res.redirect('/repassword');
 });
 
 

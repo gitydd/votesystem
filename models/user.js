@@ -1,4 +1,6 @@
 var mongodb = require('./db');
+//var mongodbClient=require('./db').MongoClient;
+//var url='mongodb://localhost:27017/microblog';
 
 /*
  * 集合`users`的文档`User`构造函数
@@ -9,12 +11,16 @@ function User(user) {
         this.address = user.address;
 	this.password = user.password;
         this.vote='';
+        this.votes='';
         this.status='';
         this.setAddress = function (address) {
            this.address = address;
         };
         this.setStatus = function (status) {
            this.status = status;
+        };
+        this.setVotes = function (votes) {
+           this.votes = votes;
         };
 };
 
@@ -34,20 +40,19 @@ User.prototype.save = function save(callback) {
 	};
 
 	mongodb.open(function(err, db) {
+     //   mongodbClient.connect(url,function(err, db) {
 		if (err) {
 			return callback(err);
 		}
 		db.collection('users', function(err, collection) {
 			if (err) {
 				mongodb.close();
+                                  // db.close();
 				return callback(err);
 			}
-
-			// collection.ensureIndex('name', {unique: true});
-
-
 			collection.insert(user, {safe: true}, function(err, user) {
 				mongodb.close();
+                                  // db.close();
 				callback(err, user);
 			});
 		});
