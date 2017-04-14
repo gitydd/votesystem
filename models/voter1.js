@@ -1,11 +1,6 @@
 module.exports={
-  doSample:function doSample(Voter_Address,Candidate_Address){ TEST_ADDRESS=Voter_Address;
-  console.log(TEST_ADDRESS,Voter_Address,Candidate_Address);
-  console.log(Voter_Address,Candidate_Address);
+  doSample:function doSample(voterAdd,candidateAdd,callback){ //TEST_ADDRESS=voterAdd;
   console.log('Hello, Bitcoin-Testnet RPC sample2.');
-/*  }
-};
-*/
 var RPC_USERNAME='admin2'; 
 var RPC_PASSWORD='123';
 var RPC_HOST="127.0.0.1";
@@ -17,8 +12,8 @@ MIN_DUST_AMOUNT=10000;  //最小有效交易金额,单位satoshi，即0.00000001
 MIN_TRANSACTION_FEE=10000; //矿工费用的最小金额，单位satoshi
 
 //初始化访问RPC服务接口的对象
-var client = require('kapitalize')()
-client
+var client2 = require('kapitalize')()
+client2
     .auth(RPC_USERNAME, RPC_PASSWORD)
     .set('host', RPC_HOST)
     .set({
@@ -27,26 +22,16 @@ client
 
 console.log('Hello, Bitcoin-Testnet RPC sample3.');
 
-  //检查测试帐号是否已存在于测试节点
-  client.getaccount(TEST_ADDRESS,function(err, result) {
-     if (err||result!=TEST_WALLET_NAME)  { //如不存在，则新导入测试帐号私钥
-        console.log(Voter_Address,Candidate_Address);
-        console.log('Import the test account[',TEST_WALLET_NAME,']:',TEST_ADDRESS);
-        client.importprivkey(TEST_PRIVATE_KEY,TEST_WALLET_NAME,function(err, imported_result) {
-            if (err) return console.log(err);
-           // if (err) return callback(err);
-            console.log('Imported OK:', imported_result);        
-            doSample();
-        });
-     }else{ //如已存在，则直接执行示例
-        console.log('The test account[',TEST_WALLET_NAME,'] existed. Address:',TEST_ADDRESS);      
-        doSample();
-     } 
-  });
-    //获取未使用的交易(UTXO)用于构建新交易的输入数据块
-    client.listunspent(6,9999999,[TEST_ADDRESS],function(err, array_unspent) {
-      if (err)   return console.log('ERROR[listunspent]:',err);
-       // if (err) return callback(err);  
+  
+
+   
+
+   //获取未使用的交易(UTXO)用于构建新交易的输入数据块  
+    client2.listunspent(1,9999999,[voterAdd],function(err, array_unspent) {
+      if (err) {
+       console.log('ERROR[listunspent]:',err);
+       return callback(err);
+      }        
       console.log('Unspent:', array_unspent);
 
       var array_transaction_in=[];
@@ -63,59 +48,65 @@ console.log('Hello, Bitcoin-Testnet RPC sample3.');
           }
       }
       
-      //确保新交易的输入金额满足最小交易条件
-      if (sum_amount<MIN_DUST_AMOUNT+MIN_TRANSACTION_FEE) return console.log('Invalid unspent amount');
+      //确保新交易的输入金额满足最 小交易条件
+      if (sum_amount<MIN_DUST_AMOUNT+MIN_TRANSACTION_FEE){
+          var invalid='Invalid unspent amount';
+          console.log('Invalid unspent amount');
+          return callback(invalid);
+      }
 
       console.log('Transaction_in:', array_transaction_in);
 
-      //生成测试新交易的输出数据块，此处示例是给指定目标测试钱包地址转账一小笔测试比特币
+      //生成测试新交易的输出数据块，此处示例是给指定目标测试钱包地址转账一小笔测试比特币"msbo8jrXaNkHu5MkmDNfdRrZAFQVBTECTP"
       //注意：输入总金额与给目标转账加找零金额间的差额即MIN_TRANSACTION_FEE，就是支付给比特币矿工的交易成本费用
-        var obj_transaction_out={ };
-        obj_transaction_out[Candidate_Address]=MIN_DUST_AMOUNT/100000000;   //目标转账地址和金额
-        obj_transaction_out[Voter_Address]=(sum_amount-MIN_DUST_AMOUNT-MIN_TRANSACTION_FEE)/100000000; //找零地址和金额，默认用发送者地址
-         
-      console.log('Transaction_out:', obj_transaction_out);
+      
+     
+           var obj_transaction_out={};
+       
+           obj_transaction_out[candidateAdd]=MIN_DUST_AMOUNT/100000000;
+           obj_transaction_out[voterAdd]=(sum_amount-MIN_DUST_AMOUNT-MIN_TRANSACTION_FEE)/100000000;
+           console.log('Transaction_out:', obj_transaction_out);
       
       //生成交易原始数据包
-      client.createrawtransaction(array_transaction_in,obj_transaction_out,function(err2, rawtransaction) {
-        // if (err2) return callback(err2);
-          if (err2) return console.log('ERROR[createrawtransaction]:',err2);
+      client2.createrawtransaction(array_transaction_in,obj_transaction_out,function(err2, rawtransaction) {
+          if (err2){
+           console.log('ERROR[createrawtransaction]:',err2);
+           return callback(err2);
+          }
           console.log('Rawtransaction:', rawtransaction);
           
           //签名交易原始数据包
-          client.signrawtransaction(rawtransaction,function(err3, signedtransaction) {
-             // if (err3) return callback(err3);
-              if (err3) return console.log('ERROR[signrawtransaction]:',err3);
+          client2.signrawtransaction(rawtransaction,function(err3, signedtransaction) {
+              if (err3){ 
+                console.log('ERROR[signrawtransaction]:',err3);
+                return callback(err3);
+              }
               console.log('Signedtransaction:', signedtransaction);
               
               var signedtransaction_hex_str=signedtransaction.hex;
               console.log('signedtransaction_hex_str:', signedtransaction_hex_str);
               
               //广播已签名的交易数据包
-              client.sendrawtransaction(signedtransaction_hex_str,false,function(err4, sended) { //注意第二个参数缺省为false,如果设为true则指Allow high fees to force it to spend，会在in与out金额差额大于正常交易成本费用时强制发送作为矿工费用(谨慎!)
-                  if (err4) return console.log('ERROR[sendrawtransaction]:',err4);
-                 // if (err4) return callback(err4);
+              client2.sendrawtransaction(signedtransaction_hex_str,false,function(err4, sended) { //注意第二个参数缺省为false,如果设为true则指Allow high fees to force it to spend，会在in与out金额差额大于正常交易成本费用时强制发送作为矿工费用(谨慎!)
+                  
+                  if (err4){ 
+                    console.log('ERROR[sendrawtransaction]:',err4);
+                    return callback(err4);
+                   }
                   console.log('Sended TX:', sended);
                   
-                  client.listaccounts(function(err, account_list) {
-                      if (err) return console.log(err);
-                     // if (err) return callback(err);
+                  client2.listaccounts(function(err, account_list) {
+                      if (err) return callback(err4);
+                      callback(err4,account_list);
                       console.log("Accounts list:\n", account_list); //发送新交易成功后，可以核对下账户余额变动情况
                     });
-              });
 
-client.getbalance(function(err, info) {
-  if (err) return console.log(err);
-    console.log('getbalance:', info);
-});
+              });
           });
       });
     });
 
-  },
-  test:function test(){
-   console.log('Hello, Bitcoin-Testnet RPC sample4.');
-  }
+}
 };
 
 
