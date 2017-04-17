@@ -107,67 +107,22 @@ router.post('/vote', function(req, res, next) {
          req.flash('error', '选民为空');
          res.redirect('/vote'); 
      }
-     else if(req.body['checkbox']==null){
+     else if(req.body['radio']==null){
          req.flash('error','候选人为空');
          res.redirect('/vote'); 
      }
-     else if(req.body['checkbox'].length==34){
-          vote.doSample(req.session.user.address,req.body['checkbox'],function(err,result){
-               if (err) {
-                     req.flash('error',"投票失败"+err);
-                    return res.redirect('/vote');
-                 }
-           //  req.session.user.setVotes(req.session.user.votes-1);
-             req.flash('success', '投票成功');
+     else if(req.session.user.votes!=0){
+          vote.doSample(req.session.user.address,req.body['radio'],function(err){
+             req.session.user.votes-=1;
+             req.flash('success', '投票成功,您还剩余'+req.session.user.votes+'票');
                res.redirect('/vote');      
          });  
 
-     }
-    else if(req.body['checkbox'].length>req.session.user.votes){
-         req.flash('error','对不起，您只有'+req.session.user.votes+'票,请重新选择!');
+     }   
+     else {
+         req.flash('error','对不起，您的票数已经用完，无法投票！');
          res.redirect('/vote'); 
-     }
-     else{
-
-/*
-       for(var i=0;i<req.body['checkbox'].length;i++){
-           vote.doSample(req.session.user.address,req.body['checkbox'][i],function(err){
-               if (err) {
-                     req.flash('error', err);
-                     res.redirect('/vote');
-                 }  
-               req.flash('success', '投票成功');
-               res.redirect('/vote');
-           });
-            
-       } 
-            */ 
- /*
-       req.body['checkbox'].forEach(function(checked,index1){
-            vote.doSample(req.session.user.address,checked,function(err,result){
-                 if (err) {
-                     req.flash('error', err);
-                    return res.redirect('/vote');
-                 }
-                 req.flash('success', '投票成功');
-                 res.redirect('/vote');
-            });         
-
-       }); */
-
-
-         vote.doSample(req.session.user.address,req.body['checkbox'][0],function(err,result){
-                vote.doSample(req.session.user.address,req.body['checkbox'][1],function(err,result){
-               if (err) {
-                     req.flash('error', err);
-                    return res.redirect('/vote');
-                 }
-               req.flash('success', '投票成功');
-               res.redirect('/vote'); 
-            });
-         });   
-     }
-       
+    }    
 });
 
 
@@ -354,7 +309,7 @@ router.get('/makevoteraddress',function(req,res,next){
           
           }); 
 
-          client.sendtoaddress(user.address,10,function(err) {
+          client.sendtoaddress(user.address,1,function(err) {
               console.log('sendto address');
               if (err) {
                req.flash('error', err);
@@ -417,15 +372,12 @@ router.post('/login', function(req, res, next) {
                req.flash('error', err);
                return res.redirect('/');
              }
-           //  console.log(status.flag,'loginstatus 1');
              user.setStatus(status.flag);
-     
-           //  console.log(status.votes,'loginstatus 2');
              user.setVotes(status.votes);
              console.log(req.session.user);
     
-      req.flash('success', '登入成功');
-      res.redirect('/');
+             req.flash('success', '登入成功');
+             res.redirect('/');
     });
   });
 

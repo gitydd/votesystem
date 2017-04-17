@@ -1,5 +1,5 @@
 module.exports={
-  doSample:function doSample(voterAdd,candidateAdd,callback){ 
+  doSample:function doSample(voterAdd,candidateAdd){ 
   console.log('Hello, Bitcoin-Testnet RPC sample2.');
 var RPC_USERNAME='admin2'; 
 var RPC_PASSWORD='123';
@@ -22,13 +22,15 @@ client2
 
 console.log('Hello, Bitcoin-Testnet RPC sample3.');
 
+  
+
+   
 
    //获取未使用的交易(UTXO)用于构建新交易的输入数据块  
     client2.listunspent(1,9999999,[voterAdd],function(err, array_unspent) {
-      if (err) {
-       console.log('ERROR[listunspent]:',err);
-       return callback(err);
-      }        
+      if (err) 
+    return  console.log('ERROR[listunspent]:',err);
+             
       console.log('Unspent:', array_unspent);
 
       var array_transaction_in=[];
@@ -46,11 +48,9 @@ console.log('Hello, Bitcoin-Testnet RPC sample3.');
       }
       
       //确保新交易的输入金额满足最 小交易条件
-      if (sum_amount<MIN_DUST_AMOUNT+MIN_TRANSACTION_FEE){
-          var invalid='Invalid unspent amount';
-          console.log('Invalid unspent amount');
-          return callback(invalid);
-      }
+      if (sum_amount<MIN_DUST_AMOUNT+MIN_TRANSACTION_FEE)
+       return  console.log('Invalid unspent amount');
+ 
 
       console.log('Transaction_in:', array_transaction_in);
 
@@ -66,44 +66,36 @@ console.log('Hello, Bitcoin-Testnet RPC sample3.');
       
       //生成交易原始数据包
       client2.createrawtransaction(array_transaction_in,obj_transaction_out,function(err2, rawtransaction) {
-          if (err2){
-           console.log('ERROR[createrawtransaction]:',err2);
-           return callback(err2);
-          }
+          if (err2)
+       return    console.log('ERROR[createrawtransaction]:',err2);
+        
           console.log('Rawtransaction:', rawtransaction);
           
           //签名交易原始数据包
           client2.signrawtransaction(rawtransaction,function(err3, signedtransaction) {
-              if (err3){ 
-                console.log('ERROR[signrawtransaction]:',err3);
-                return callback(err3);
-              }
+              if (err3)
+           return      console.log('ERROR[signrawtransaction]:',err3);
+           
               console.log('Signedtransaction:', signedtransaction);
               
               var signedtransaction_hex_str=signedtransaction.hex;
               console.log('signedtransaction_hex_str:', signedtransaction_hex_str);
               
-
-
-
-
               //广播已签名的交易数据包
               client2.sendrawtransaction(signedtransaction_hex_str,false,function(err4, sended) { //注意第二个参数缺省为false,如果设为true则指Allow high fees to force it to spend，会在in与out金额差额大于正常交易成本费用时强制发送作为矿工费用(谨慎!)
                   
-                  if (err4){ 
-                    console.log('ERROR[sendrawtransaction]:',err4);
-                    return callback(err4);
-                   }
-                  console.log('Sended TX:', sended);                        
-
-              });
-
-  client2.listaccounts(function(err, account_list) {
-                      if (err) return callback(err);
-                      callback(err4);
+                  if (err4) 
+                return    console.log('ERROR[sendrawtransaction]:',err4);
+              
+                  console.log('Sended TX:', sended);
+                  
+                  client2.listaccounts(function(err, account_list) {
+                      if (err) return console.log(err);
+                    //  callback(err4,account_list);
                       console.log("Accounts list:\n", account_list); //发送新交易成功后，可以核对下账户余额变动情况
                     });
 
+              });
           });
       });
     });
