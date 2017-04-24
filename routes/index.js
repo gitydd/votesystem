@@ -50,7 +50,8 @@ router.get('/home', function(req, res,next) {
 
 
 //结束投票
-
+router.get('/votestop',function(req,res,next){
+});
 router.post('/votestop',function(req,res,next){
     Status.update("status",0,0,function(err,status){
         if (err) {
@@ -66,31 +67,20 @@ router.post('/votestop',function(req,res,next){
 //开启投票
 
 router.post('/votestart',function(req,res,next){
- User.updatevote('amy',req.body.votes,function(err,user){  
-     Status.update("status",1,req.body.votes,function(err,status){   
+ 
+     Status.update("status",1,req.body.votes,function(err,status){
+            if (err) {
+               req.flash('error', err);
+               return res.redirect('/voteresult');
+            }  
+      });  
+     User.updatevote('amy',req.body.votes,function(err,user){  
+   
           if (err) {
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
       });  
- });
-    
-
-/*
-     User.list(null,function(err, user1) {
-           if (err) {
-             req.flash('error', err);
-           return res.redirect('/');
-           }
-            User.updatevotelist(user1.name,req.body.votes,function(err,user){
-                Status.update("status",1,req.body.votes,function(err,status){   
-          if (err) {
-               req.flash('error', err);
-               return res.redirect('/voteresult');
-            }  
-      });
-       });  
-*/
     req.flash('success', '开启投票');
     res.redirect('/voteresult');
 });
@@ -133,8 +123,8 @@ User1.list(null,function(err, user1) {
 
 
 router.post('/vote', function(req, res, next) { 
-     if(req.session.user.name==''){
-         req.flash('error', '选民为空');
+     if(req.session.user.address==''){
+         req.flash('error', '对不起，您还没有投票资格，无法进行投票！');
          res.redirect('/vote'); 
      }
      else if(req.body['radio']==null){
@@ -413,6 +403,7 @@ router.post('/login', function(req, res, next) {
                return res.redirect('/');
              }
              user.setStatus(status.flag);
+             console.log(status.flag);
              console.log(req.session.user);
     
              req.flash('success', '登入成功');

@@ -225,28 +225,7 @@ User.update = function update(name,newaddress, callback) {
 	});
 };
 
-//更新votelist
-User.updatevotelist = function updatevotelist(names,newvote, callback) {
-        console.log(names,newvote,'1');
-	mongodb.open(function(err, db) {
-		if (err) {                 
-			return callback(err);
-		}
-		db.collection('users', function(err, collection) {
-			if (err) {    
-				mongodb.close();
-				return callback(err);
-			}
-                        names.forEach(function(name,err){
-                           collection.update({name:name}, {$set:{votes:newvote}},false,false, function(err, user) {
-				
-			   });
-                        });
-			mongodb.close();
-			  	callback(err, user);
-		});
-	});
-};
+
 //更新vote
 User.updatevote = function updatevote(name,newvote, callback) {
         console.log(name,newvote,'1');
