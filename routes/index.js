@@ -57,7 +57,6 @@ router.post('/votestop',function(req,res,next){
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
-      // res.redirect('/voteresult');  
    }); 
    req.flash('success', '结束投票');
    res.redirect('/voteresult'); 
@@ -67,16 +66,47 @@ router.post('/votestop',function(req,res,next){
 //开启投票
 
 router.post('/votestart',function(req,res,next){
-   console.log(req.body.votes,'everyone votes');
-    Status.update("status",1,req.body.votes,function(err,status){
-        if (err) {
+ User.updatevote('amy',req.body.votes,function(err,user){  
+     Status.update("status",1,req.body.votes,function(err,status){   
+          if (err) {
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
-      //res.redirect('/voteresult'); 
-     });
+      });  
+ });
     
-  req.flash('success', '开启投票');
+
+/*
+     User.list(null,function(err, user1) {
+           if (err) {
+             req.flash('error', err);
+           return res.redirect('/');
+           }
+            User.updatevotelist(user1.name,req.body.votes,function(err,user){
+                Status.update("status",1,req.body.votes,function(err,status){   
+          if (err) {
+               req.flash('error', err);
+               return res.redirect('/voteresult');
+            }  
+      });
+       });  
+*/
+    req.flash('success', '开启投票');
+    res.redirect('/voteresult');
+});
+
+
+//重置投票
+router.post('/voterestart',function(req,res,next){
+  User.delete1(function(err){
+    User1.delete1(function(err){
+       if(err){
+          req.flash('error', err);
+          return res.redirect('/voteresult');
+       }
+    }); 
+  });
+  req.flash('success', '重置投票');
   res.redirect('/voteresult');
 });
 
@@ -113,9 +143,17 @@ router.post('/vote', function(req, res, next) {
      }
      else if(req.session.user.votes!=0){
           vote.doSample(req.session.user.address,req.body['radio'],function(err){
-             req.session.user.votes-=1;
+             
+          User.updatevote(req.session.user.name,
+             req.session.user.votes-1,function(err,user)                       {                  
+             if (err) {
+                  req.flash('error', err);
+                  return res.redirect('/voteresult');
+              }  
+          });
+             req.session.user.votes-=1;//每次只能投一票，因为一个地址一次只能产生一笔交易，只有该笔交易确认之后才能产生新的交易。这样避免双重支付，一笔钱只能转给一个地址，且只能转一次。
              req.flash('success', '投票成功,您还剩余'+req.session.user.votes+'票');
-               res.redirect('/vote');      
+             res.redirect('/vote');      
          });  
 
      }   
@@ -197,8 +235,9 @@ router.post('/reg', function(req, res, next) {
    var newUser = new User({
      name: req.body.username,
      address:'',
+     votes:'',
      password: password,
-     vote:'',
+     identity:'voter',
    });
    //检查用户名是否已经存在
    User.get(newUser.name, function(err, user) {
@@ -367,13 +406,13 @@ router.post('/login', function(req, res, next) {
       return res.redirect('/login');
     }
     req.session.user = user;
+
     Status.get("status",function(err,status){
              if(err){
                req.flash('error', err);
                return res.redirect('/');
              }
              user.setStatus(status.flag);
-             user.setVotes(status.votes);
              console.log(req.session.user);
     
              req.flash('success', '登入成功');
@@ -405,8 +444,7 @@ router.post('/repassword', function(req, res, next) {
       req.flash('error',err);
       console.log(err);
       return res.redirect('/repassword');
-    }
-   
+    }  
   });
    req.flash('success', '修改成功');
    res.redirect('/repassword');

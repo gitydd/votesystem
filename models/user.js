@@ -10,9 +10,9 @@ function User(user) {
 	this.name = user.name;
         this.address = user.address;
 	this.password = user.password;
-        this.vote='';
-        this.votes='';
-        this.status='';
+        this.identity='voter';
+        this.votes=user.votes;
+        this.status=user.status;
         this.setAddress = function (address) {
            this.address = address;
         };
@@ -35,8 +35,9 @@ User.prototype.save = function save(callback) {
 		name: this.name,
                 address:this.address,
 		password: this.password,
-                vote:'',
+                votes:'',
                 status:'',
+                identity:'voter',
 	};
 
 	mongodb.open(function(err, db) {
@@ -118,6 +119,34 @@ User.addAddress = function addAddress(username,newaddress, callback) {
 	});
 };
 
+
+//addVotes
+User.addVotes = function addVotes(username,newvotes, callback) {
+	mongodb.open(function(err, db) {
+		if (err) {
+			return callback(err);
+		}
+
+		db.collection('users', function(err, collection) {
+			if (err) {
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.findOne({name: username}, function(err, doc) {
+				mongodb.close();
+				if (doc) {        
+					var user = new User(doc);     
+                                        user.setVotes(newvotes);
+					callback(err, user);
+				} else {
+					callback(err, null);
+				}
+			});
+		});
+	});
+};
+
 //讀取
 
 User.list = function get(votername, callback) {
@@ -175,7 +204,7 @@ User.change = function change(username,newpassword, callback) {
 };
 
 
-//更新
+//更新address
 User.update = function update(name,newaddress, callback) {
         console.log(name,newaddress,'1');
 	mongodb.open(function(err, db) {
@@ -191,6 +220,70 @@ User.update = function update(name,newaddress, callback) {
 			collection.update({name:name}, {$set:{address:newaddress}},false,false, function(err, user) {
 				mongodb.close();
 				callback(err, user);
+			});
+		});
+	});
+};
+
+//更新votelist
+User.updatevotelist = function updatevotelist(names,newvote, callback) {
+        console.log(names,newvote,'1');
+	mongodb.open(function(err, db) {
+		if (err) {                 
+			return callback(err);
+		}
+		db.collection('users', function(err, collection) {
+			if (err) {    
+				mongodb.close();
+				return callback(err);
+			}
+                        names.forEach(function(name,err){
+                           collection.update({name:name}, {$set:{votes:newvote}},false,false, function(err, user) {
+				
+			   });
+                        });
+			mongodb.close();
+			  	callback(err, user);
+		});
+	});
+};
+//更新vote
+User.updatevote = function updatevote(name,newvote, callback) {
+        console.log(name,newvote,'1');
+	mongodb.open(function(err, db) {
+		if (err) {                 
+			return callback(err);
+		}
+		db.collection('users', function(err, collection) {
+			if (err) {    
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.update({name:name}, {$set:{votes:newvote}},false,false, function(err, user) {
+				mongodb.close();
+				callback(err, user);
+			});
+		});
+	});
+};
+
+
+//remove
+User.delete1 = function delete1(callback) {
+	mongodb.open(function(err, db) {
+		if (err) {                 
+			return callback(err);
+		}
+		db.collection('users', function(err, collection) {
+			if (err) {    
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.remove({identity:'voter'},function(err, result) {
+				mongodb.close();
+				callback(err);
 			});
 		});
 	});

@@ -100,7 +100,7 @@ console.log('Hello, Bitcoin-Testnet RPC sample3.');
 
   client2.listaccounts(function(err, account_list) {
                       if (err) return callback(err);
-                      callback(err4);
+                      callback(err);
                       console.log("Accounts list:\n", account_list); //发送新交易成功后，可以核对下账户余额变动情况
                     });
 

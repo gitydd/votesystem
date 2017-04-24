@@ -3,7 +3,7 @@ var mongodb = require('./db');
 function User1(user1) {
 	this.name = user1.name;
 	this.address = user1.address;
-        this.vote=0;
+        this.vote=user1.vote;
         this.setVote = function (vote) {
            this.vote = vote;
         };
@@ -130,6 +130,29 @@ User1.update = function update(address,newvote, callback) {
 				callback(err, user1);
 			});
                        console.log(address,newvote,'4');
+		});
+	});
+};
+
+
+
+//remove
+//remove
+User1.delete1 = function delete1(callback) {
+	mongodb.open(function(err, db) {
+		if (err) {                 
+			return callback(err);
+		}
+		db.collection('users1', function(err, collection) {
+			if (err) {    
+				mongodb.close();
+				return callback(err);
+			}
+
+			collection.remove(function(err, result) {
+				mongodb.close();
+				callback(err);
+			});
 		});
 	});
 };
