@@ -1,5 +1,5 @@
-var mongodb = require('./db');
-
+var mongodbClient=require('mongodb').MongoClient;
+var url='mongodb://localhost:27017/microblog';
 function User1(user1) {
 	this.name = user1.name;
 	this.address = user1.address;
@@ -18,22 +18,21 @@ User1.prototype.save = function save(callback) {
 		address: this.address,
                 vote:0,
 	};
-
-	mongodb.open(function(err, db) {
+         mongodbClient.connect(url,function(err, db) {
 		if (err) {
 			return callback(err);
 		}
 		db.collection('users1', function(err, collection) {
 			if (err) {
-				mongodb.close();
+                                db.close();
 				return callback(err);
 			}
 
 			// collection.ensureIndex('name', {unique: true});
 
 
-			collection.insert(user1, {safe: true}, function(err, user1) {
-				mongodb.close();
+			collection.insert(user1, {safe: true}, function(err, user1) {		
+                                 db.close();
 				callback(err, user1);
 			});
 		});
@@ -48,19 +47,19 @@ User1.prototype.save = function save(callback) {
  */
 
 User1.get = function get(username, callback) {
-	mongodb.open(function(err, db) {
+         mongodbClient.connect(url,function(err, db) {
 		if (err) {
 			return callback(err);
 		}
 
 		db.collection('users1', function(err, collection) {
 			if (err) {
-				mongodb.close();
+                                db.close();
 				return callback(err);
 			}
 
 			collection.findOne({name: username}, function(err, doc) {
-				mongodb.close();
+                                db.close();
 				if (doc) {
 
 					var user1 = new User1(doc);
@@ -76,14 +75,14 @@ User1.get = function get(username, callback) {
 //讀取
 
 User1.list = function get(candidatename, callback) {
-  mongodb.open(function(err, db) {
+    mongodbClient.connect(url,function(err, db) {
     if (err) {
       return callback(err);
     }
     // 读取 candidates 集合
     db.collection('users1', function(err, collection) {
       if (err) {
-        mongodb.close();
+         db.close();
         return callback(err);
       }     
       var query = {};
@@ -91,7 +90,7 @@ User1.list = function get(candidatename, callback) {
         query.name = candidatename;
       }
       collection.find(query).toArray(function(err, docs) {
-        mongodb.close();
+         db.close();
         if (err) {
           callback(err, null);
         }
@@ -111,22 +110,20 @@ User1.list = function get(candidatename, callback) {
 //更新
 User1.update = function update(address,newvote, callback) {
         console.log(address,newvote,'1');
-	mongodb.open(function(err, db) {
-		if (err) { 
-                       //  console.log(err);                   
+         mongodbClient.connect(url,function(err, db) {
+		if (err) {                   
 			return callback(err);
 		}
                 console.log(address,newvote,'2');
 		db.collection('users1', function(err, collection) {
 			if (err) { 
-                              //  console.log(err);     
-				mongodb.close();
+                                db.close();
 				return callback(err);
 			}
                         console.log(address,newvote,'3');
 
 			collection.update({address:address}, {$set:{vote:newvote}},false,false, function(err, user1) {
-				mongodb.close();
+                                db.close();
 				callback(err, user1);
 			});
                        console.log(address,newvote,'4');
@@ -135,22 +132,20 @@ User1.update = function update(address,newvote, callback) {
 };
 
 
-
-//remove
 //remove
 User1.delete1 = function delete1(callback) {
-	mongodb.open(function(err, db) {
+         mongodbClient.connect(url,function(err, db) {
 		if (err) {                 
 			return callback(err);
 		}
 		db.collection('users1', function(err, collection) {
 			if (err) {    
-				mongodb.close();
+                                db.close();
 				return callback(err);
 			}
 
 			collection.remove(function(err, result) {
-				mongodb.close();
+                                db.close();
 				callback(err);
 			});
 		});

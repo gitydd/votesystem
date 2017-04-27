@@ -27,18 +27,18 @@ var express = require('express'),
 var http=require('http');
 /*主页路由 */
 router.get('/', function(req, res,next) {
-	Post.get(null, function(err, posts) {
+	/*Post.get(null, function(err, posts) {
 		if (err) {
 			posts = [];
 		}
-            
+            */
 		res.render('index', {
 			title: '首页',
-			posts: posts,
+			//posts: posts,
 			user : req.session.user,
             success : req.flash('success').toString(),
             error : req.flash('error').toString()
-		});
+		//});
 	});
 });
 
@@ -50,8 +50,6 @@ router.get('/home', function(req, res,next) {
 
 
 //结束投票
-router.get('/votestop',function(req,res,next){
-});
 router.post('/votestop',function(req,res,next){
     Status.update("status",0,0,function(err,status){
         if (err) {
@@ -65,7 +63,6 @@ router.post('/votestop',function(req,res,next){
 
 
 //开启投票
-
 router.post('/votestart',function(req,res,next){
  
      Status.update("status",1,req.body.votes,function(err,status){
@@ -127,26 +124,51 @@ router.post('/vote', function(req, res, next) {
          req.flash('error', '对不起，您还没有投票资格，无法进行投票！');
          res.redirect('/vote'); 
      }
-     else if(req.body['radio']==null){
+     else if(req.body['checkbox']==null){
          req.flash('error','候选人为空');
          res.redirect('/vote'); 
      }
-     else if(req.session.user.votes!=0){
-          vote.doSample(req.session.user.address,req.body['radio'],function(err){
+    
+     else if(req.body['checkbox'].length==34&&req.session.user.votes!=0){
+          vote.doSample(req.session.user.address,req.body['checkbox'],function(err){
              
           User.updatevote(req.session.user.name,
              req.session.user.votes-1,function(err,user)                       {                  
              if (err) {
                   req.flash('error', err);
-                  return res.redirect('/voteresult');
+                  return res.redirect('/vote');
               }  
           });
-             req.session.user.votes-=1;//每次只能投一票，因为一个地址一次只能产生一笔交易，只有该笔交易确认之后才能产生新的交易。这样避免双重支付，一笔钱只能转给一个地址，且只能转一次。
+             req.session.user.votes-=1;
              req.flash('success', '投票成功,您还剩余'+req.session.user.votes+'票');
              res.redirect('/vote');      
          });  
+     }  
+     else if(req.body['checkbox'].length>req.session.user.votes){
+         req.flash('error','对不起，您只有'+req.session.user.votes+'票,请重新选择!');
+         res.redirect('/vote'); 
+     }
 
-     }   
+     else if(req.session.user.votes!=0){
+       var oneSecond=6000*1;
+       for(var i=0;i<req.body['checkbox'].length;i++){     
+          setTimeout(
+
+           vote.doSample(req.session.user.address,req.body['checkbox'][i],function(err){
+                User.updatevote(req.session.user.name,
+             req.session.user.votes-1,function(err,user)                       {                  
+             if (err) {
+                  req.flash('error', err);
+                  return res.redirect('/vote');
+              }  
+            });
+                        
+           })
+           ,oneSecond);     
+       } 
+       req.flash('success', '投票成功');   
+       res.redirect('/vote'); 
+     }
      else {
          req.flash('error','对不起，您的票数已经用完，无法投票！');
          res.redirect('/vote'); 
@@ -396,7 +418,8 @@ router.post('/login', function(req, res, next) {
       return res.redirect('/login');
     }
     req.session.user = user;
-
+   //  req.flash('success', '登入成功');
+    //         res.redirect('/');
     Status.get("status",function(err,status){
              if(err){
                req.flash('error', err);
