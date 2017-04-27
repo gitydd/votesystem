@@ -57,33 +57,53 @@ router.post('/votestop',function(req,res,next){
                return res.redirect('/voteresult');
             }  
    }); 
+    User.list(null,function(err, user1) {
+           if (err) {
+             req.flash('error', err);
+           return res.redirect('/voteresult');
+           }
+           user1.forEach(function(user,err){
+            User.updatevote(user.name,0,function(err,user){
+                if (err) {
+                     req.flash('error', err);
+                return res.redirect('/voteresult');
+                }
+             });
+           });
+     }); 
    req.flash('success', '结束投票');
    res.redirect('/voteresult'); 
 });
 
 
 //开启投票
-router.post('/votestart',function(req,res,next){
- 
+router.post('/votestart',function(req,res,next){ 
      Status.update("status",1,req.body.votes,function(err,status){
             if (err) {
                req.flash('error', err);
                return res.redirect('/voteresult');
             }  
       });  
-     User.updatevote('amy',req.body.votes,function(err,user){  
-   
-          if (err) {
-               req.flash('error', err);
-               return res.redirect('/voteresult');
-            }  
-      });  
+     User.list(null,function(err, user1) {
+           if (err) {
+             req.flash('error', err);
+           return res.redirect('/voteresult');
+           }
+           user1.forEach(function(user,err){
+            User.updatevote(user.name,req.body.votes,function(err,user){
+                if (err) {
+                     req.flash('error', err);
+                return res.redirect('/voteresult');
+                }
+             });
+           });
+     }); 
     req.flash('success', '开启投票');
     res.redirect('/voteresult');
 });
 
 
-//重置投票
+//重新开启一次投票
 router.post('/voterestart',function(req,res,next){
   User.delete1(function(err){
     User1.delete1(function(err){
@@ -130,7 +150,7 @@ router.post('/vote', function(req, res, next) {
      }
     
      else if(req.body['checkbox'].length==34&&req.session.user.votes!=0){
-          vote.doSample(req.session.user.address,req.body['checkbox'],function(err){
+        vote.doSample(req.session.user.address,req.body['checkbox'],function(err){
              
           User.updatevote(req.session.user.name,
              req.session.user.votes-1,function(err,user)                       {                  
@@ -142,7 +162,7 @@ router.post('/vote', function(req, res, next) {
              req.session.user.votes-=1;
              req.flash('success', '投票成功,您还剩余'+req.session.user.votes+'票');
              res.redirect('/vote');      
-         });  
+        });  
      }  
      else if(req.body['checkbox'].length>req.session.user.votes){
          req.flash('error','对不起，您只有'+req.session.user.votes+'票,请重新选择!');
@@ -150,7 +170,7 @@ router.post('/vote', function(req, res, next) {
      }
 
      else if(req.session.user.votes!=0){
-       var oneSecond=6000*1;
+       var oneSecond=8000*1;
        for(var i=0;i<req.body['checkbox'].length;i++){     
           setTimeout(
 
